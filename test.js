@@ -11,4 +11,4 @@ function time(iterator, seconds) {
 
     console.log(`число операций ${lastValue}`);
 }
-time(q,     0.1);
+time(q,         0.1);
