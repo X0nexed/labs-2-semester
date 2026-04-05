@@ -1,4 +1,4 @@
-const generator = require('lab_complete/my-lib');
+const generator = require('lab_complete/lab1/my-lib');
 const q = generator();
 
 function time(iterator, seconds) {
@@ -11,4 +11,4 @@ function time(iterator, seconds) {
 
     console.log(`число операций ${lastValue}`);
 }
-time(q,         0.1);
+time(q,0.1);
