@@ -1,3 +1,10 @@
+class RateLimitError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "RateLimitError";
+    }
+}
+
 class ApiService {
     async request(endpoint, options = {}) {
         return { status: 200, data: `OK: ${endpoint}` };
@@ -22,7 +29,7 @@ class AuthProxy {
         this.requestHistory = this.requestHistory.filter(time => now - time < this.rateLimitConfig.windowMs);
 
         if (this.requestHistory.length >= this.rateLimitConfig.maxRequests) {
-            throw new Error("Ліміт запитів!");
+            throw new RateLimitError(`Перевищено ліміт запитів: ${this.rateLimitConfig.maxRequests} за ${this.rateLimitConfig.windowMs} мс`);
         }
         this.requestHistory.push(now);
     }
@@ -60,12 +67,19 @@ class AuthProxy {
     const api = new ApiService();
     const proxy = new AuthProxy(api);
 
-    proxy.setAuthMethod('API_KEY', { key: "secret_123" });
-    await proxy.request("/data", { id: 1 });
+    try {
+        proxy.setAuthMethod('API_KEY', { key: "secret_123" });
+        const res1 = await proxy.request("/data", { id: 1 });
+        console.log("Відповідь:", res1);
 
-    proxy.setAuthMethod('JWT', {
-        token: "old_token",
-        expiresAt: Date.now() - 5000
-    });
-    await proxy.request("/profile", { user: "admin" });
+        proxy.setAuthMethod('JWT', {
+            token: "old_token",
+            expiresAt: Date.now() - 5000
+        });
+        const res2 = await proxy.request("/profile", { user: "admin" });
+        console.log("Відповідь:", res2);
+        
+    } catch (e) {
+        console.error("Помилка:", e.message);
+    }
 })();
